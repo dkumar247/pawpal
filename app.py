@@ -1,4 +1,5 @@
 import streamlit as st
+from scheduler import Task, Scheduler
 
 st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
 
@@ -71,18 +72,52 @@ else:
 st.divider()
 
 st.subheader("Build Schedule")
-st.caption("This button should call your scheduling logic once you implement it.")
+
+time_budget = st.number_input(
+    "Time budget for today (minutes)", min_value=1, max_value=1440, value=60
+)
 
 if st.button("Generate schedule"):
-    st.warning(
-        "Not implemented yet. Next step: create your scheduling logic (classes/functions) and call it here."
-    )
-    st.markdown(
-        """
-Suggested approach:
-1. Design your UML (draft).
-2. Create class stubs (no logic).
-3. Implement scheduling behavior.
-4. Connect your scheduler here and display results.
-"""
-    )
+    if not st.session_state.tasks:
+        st.warning("Add at least one task before generating a schedule.")
+    else:
+        tasks = [
+            Task(
+                title=t["title"],
+                duration=t["duration_minutes"],
+                priority=t["priority"],
+            )
+            for t in st.session_state.tasks
+        ]
+        result = Scheduler(time_budget_minutes=int(time_budget)).schedule(tasks)
+
+        st.markdown("#### Scheduled tasks")
+        if result.selected:
+            st.table(
+                [
+                    {
+                        "Task": t.title,
+                        "Duration (min)": t.duration,
+                        "Priority": t.priority.value,
+                    }
+                    for t in result.selected
+                ]
+            )
+        else:
+            st.info("No tasks fit within the time budget.")
+
+        if result.skipped:
+            st.markdown("#### Skipped tasks")
+            st.table(
+                [
+                    {
+                        "Task": t.title,
+                        "Duration (min)": t.duration,
+                        "Priority": t.priority.value,
+                    }
+                    for t in result.skipped
+                ]
+            )
+
+        st.markdown("#### Explanation")
+        st.code(result.explanation, language=None)
