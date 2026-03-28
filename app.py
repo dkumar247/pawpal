@@ -59,9 +59,12 @@ with col3:
     priority = st.selectbox("Priority", ["low", "medium", "high"], index=2)
 
 if st.button("Add task"):
-    st.session_state.tasks.append(
-        {"title": task_title, "duration_minutes": int(duration), "priority": priority}
-    )
+    if not task_title.strip():
+        st.error("Task title cannot be blank. Please enter a name for the task.")
+    else:
+        st.session_state.tasks.append(
+            {"title": task_title.strip(), "duration_minutes": int(duration), "priority": priority}
+        )
 
 if st.session_state.tasks:
     st.write("Current tasks:")
@@ -78,18 +81,31 @@ time_budget = st.number_input(
 )
 
 if st.button("Generate schedule"):
-    if not st.session_state.tasks:
+    if not owner_name.strip():
+        st.error("Owner name cannot be blank.")
+    elif not pet_name.strip():
+        st.error("Pet name cannot be blank.")
+    elif not st.session_state.tasks:
         st.warning("Add at least one task before generating a schedule.")
+    elif int(time_budget) < 1:
+        st.error("Time budget must be at least 1 minute.")
     else:
-        tasks = [
-            Task(
-                title=t["title"],
-                duration=t["duration_minutes"],
-                priority=t["priority"],
-            )
-            for t in st.session_state.tasks
-        ]
-        result = Scheduler(time_budget_minutes=int(time_budget)).schedule(tasks)
+        try:
+            tasks = [
+                Task(
+                    title=t["title"],
+                    duration=t["duration_minutes"],
+                    priority=t["priority"],
+                )
+                for t in st.session_state.tasks
+            ]
+            result = Scheduler(time_budget_minutes=int(time_budget)).schedule(tasks)
+        except (ValueError, KeyError) as exc:
+            st.error(f"Could not build schedule: {exc}")
+            st.stop()
+        except Exception as exc:
+            st.error(f"Unexpected error — this may be a bug: {exc}")
+            st.stop()
 
         st.markdown("#### Scheduled tasks")
         if result.selected:
@@ -104,7 +120,10 @@ if st.button("Generate schedule"):
                 ]
             )
         else:
-            st.info("No tasks fit within the time budget.")
+            st.info(
+                "No tasks fit within the time budget. "
+                "Try increasing the time budget or reducing task durations."
+            )
 
         if result.skipped:
             st.markdown("#### Skipped tasks")
