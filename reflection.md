@@ -47,7 +47,7 @@ This is a deliberate simplification. The tradeoff is that greedy selection can m
 - How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
 - What kinds of prompts or questions were most helpful?
 
-AI was used throughout: generating the initial `scheduler.py` structure, writing the pytest suite, wiring the scheduler into the Streamlit UI, and adding edge-case handling in `app.py`. The most effective prompts were specific and constrained — for example, requesting edge-case handling with an explicit "do not refactor unrelated code" instruction produced focused changes rather than broad rewrites.
+AI was used throughout: generating the initial `pawpal_system.py` structure (Owner, Pet, Task, Scheduler skeletons), writing the pytest suite, wiring the system model into the Streamlit UI, and adding edge-case handling in `app.py`. The most effective prompts were specific and constrained — for example, requesting edge-case handling with an explicit "do not refactor unrelated code" instruction produced focused changes rather than broad rewrites.
 
 **b. Judgment and verification**
 
