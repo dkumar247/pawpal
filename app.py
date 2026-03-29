@@ -41,7 +41,14 @@ if st.button("Add task"):
 
 if st.session_state.tasks:
     st.write("Current tasks:")
-    st.table(st.session_state.tasks)
+    for i, task in enumerate(st.session_state.tasks):
+        col_title, col_dur, col_pri, col_btn = st.columns([4, 2, 2, 1])
+        col_title.write(task["title"])
+        col_dur.write(f"{task['duration_minutes']} min")
+        col_pri.write(task["priority"])
+        if col_btn.button("Remove", key=f"remove_{i}"):
+            st.session_state.tasks.pop(i)
+            st.rerun()
 else:
     st.info("No tasks yet. Add one above.")
 
