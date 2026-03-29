@@ -23,6 +23,9 @@ st.caption("Add a few tasks. In your final version, these should feed into your 
 if "tasks" not in st.session_state:
     st.session_state.tasks = []
 
+if "editing_index" not in st.session_state:
+    st.session_state.editing_index = None
+
 col1, col2, col3 = st.columns(3)
 with col1:
     task_title = st.text_input("Task title", value="Morning walk")
@@ -42,13 +45,34 @@ if st.button("Add task"):
 if st.session_state.tasks:
     st.write("Current tasks:")
     for i, task in enumerate(st.session_state.tasks):
-        col_title, col_dur, col_pri, col_btn = st.columns([4, 2, 2, 1])
-        col_title.write(task["title"])
-        col_dur.write(f"{task['duration_minutes']} min")
-        col_pri.write(task["priority"])
-        if col_btn.button("Remove", key=f"remove_{i}"):
-            st.session_state.tasks.pop(i)
-            st.rerun()
+        if st.session_state.editing_index == i:
+            ecol1, ecol2, ecol3 = st.columns(3)
+            new_title = ecol1.text_input("Title", value=task["title"], key=f"edit_title_{i}")
+            new_duration = ecol2.number_input("Duration (min)", min_value=1, max_value=240, value=task["duration_minutes"], key=f"edit_dur_{i}")
+            new_priority = ecol3.selectbox("Priority", ["low", "medium", "high"], index=["low", "medium", "high"].index(task["priority"]), key=f"edit_pri_{i}")
+            scol1, scol2 = st.columns([1, 5])
+            if scol1.button("Save", key=f"save_{i}"):
+                if new_title.strip():
+                    st.session_state.tasks[i] = {"title": new_title.strip(), "duration_minutes": int(new_duration), "priority": new_priority}
+                    st.session_state.editing_index = None
+                    st.rerun()
+                else:
+                    st.error("Title cannot be blank.")
+            if scol2.button("Cancel", key=f"cancel_{i}"):
+                st.session_state.editing_index = None
+                st.rerun()
+        else:
+            col_title, col_dur, col_pri, col_edit, col_remove = st.columns([4, 2, 2, 1, 1])
+            col_title.write(task["title"])
+            col_dur.write(f"{task['duration_minutes']} min")
+            col_pri.write(task["priority"])
+            if col_edit.button("Edit", key=f"edit_{i}"):
+                st.session_state.editing_index = i
+                st.rerun()
+            if col_remove.button("Remove", key=f"remove_{i}"):
+                st.session_state.tasks.pop(i)
+                st.session_state.editing_index = None
+                st.rerun()
 else:
     st.info("No tasks yet. Add one above.")
 
