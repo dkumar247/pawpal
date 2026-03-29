@@ -74,6 +74,8 @@ Runs all 30 tests across both test files. Use `-v` for per-test output:
 python -m pytest -v
 ```
 
+**Confidence level: ★★★★☆ (4/5)** — core scheduling logic (sorting, conflict detection, recurrence) is fully tested and all 30 tests pass; the UI layer is validated manually rather than through automated tests.
+
 ---
 
 ## Run the CLI Demo
